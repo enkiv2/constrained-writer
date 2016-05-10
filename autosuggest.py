@@ -25,6 +25,16 @@ def bigramSuggest(world, word, invert=False):
 		ret.reverse()
 	return ret
 
+def pfxFilter(wordList, pfx):
+	ret=[]
+	for word in wordList:
+		if(word.find(pfx)==0):
+			ret.append(word)
+	return ret
+
+def bigramSuggestPfx(world, word, pfx, invert=False):
+	return pfxFilter(bigramSuggest(world, word, invert), pfx)
+
 def corpus2bigrams(text):
 	world={}
 	chars=",./<>?'\":;`~!@#$%^&*()_+-=\\|[]{}\r\n\t"

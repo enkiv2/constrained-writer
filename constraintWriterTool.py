@@ -5,17 +5,19 @@ import os, sys
 from sys import argv, exit
 
 def printUsage():
-	print("Usage: constraintWriterTool action [options]\nActions:\n\tsuggest\t\tbigramfile word\n\tinWhitelist\tbigramfile word\n\tinBlacklist\tbigramfile word\n\tcompile\t\tcorpus bigramfile\n\tcompileMulti\tbigramfile corpus [corpus_2 ... corpus_n]\n")
+	print("Usage: constraintWriterTool action [options]\nActions:\n\tsuggest\t\tbigramfile word\n\tsuggestPfx\t\tbigramfile word prefix\n\tinWhitelist\tbigramfile word\n\tinBlacklist\tbigramfile word\n\tcompile\t\tcorpus bigramfile\n\tcompileMulti\tbigramfile corpus [corpus_2 ... corpus_n]\n")
 	exit(1)
 
 if len(argv)<4:
 	printUsage()
 
 world={}
-if argv[1] in ["suggest", "inWhitelist", "inBlacklist"]:
+if argv[1] in ["suggest", "suggestPfx", "inWhitelist", "inBlacklist"]:
 	def inBlacklist(world, word):
 		return checkWhiteList(world, word, True)
-	funcs={"suggest":bigramSuggest, "inWhitelist":checkWhiteList, "inBlacklist":inBlacklist}
+	def pfx(world, word):
+		return bigramSuggestPfx(world, word, argv[4])
+	funcs={"suggest":bigramSuggest, "inWhitelist":checkWhiteList, "inBlacklist":inBlacklist, "suggestPfx":pfx}
 	world=loadBigrams(argv[2])
 	print(funcs[argv[1]](world, argv[3]))
 	exit(0)
