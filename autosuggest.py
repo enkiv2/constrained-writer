@@ -28,8 +28,11 @@ def bigramSuggest(world, word, invert=False):
 def pfxFilter(wordList, pfx):
 	ret=[]
 	for word in wordList:
-		if(word.find(pfx)==0):
-			ret.append(word)
+		try:
+			if(word.find(pfx)==0):
+				ret.append(word)
+		except:
+			pass
 	return ret
 
 def bigramSuggestPfx(world, word, pfx, invert=False):
