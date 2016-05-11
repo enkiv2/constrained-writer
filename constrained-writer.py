@@ -15,7 +15,7 @@ import sys
 
 top=Tk()
 
-global whitelist, blacklist, autocorrect_corpus, invert_suggestions, suggestions, fname
+global whitelist, blacklist, autocorrect_corpus, invert_suggestions, suggestions, current_suggestion, fname
 
 fname=""
 whitelist=None
@@ -23,6 +23,7 @@ blacklist=None
 autocorrect_corpus=None
 invert_suggestions=IntVar()
 suggestions=[]
+current_suggestion=0
 
 chars=",./<>?'\":;`~!@#$%^&*()_+-=\\|[]{}\r\n\t"
 
@@ -79,6 +80,9 @@ def handleOpen(*args):
 					pass
 				editBox.insert(START, f.read())
 				top.wm_title("Constrained Writer: "+fname)
+				editBox.mark_set("matchStart", START)
+				editBox.mark_set("matchEnd", START)
+			handleKeyActivity()
 
 def handlePickWhitelist(*args):
 	global whitelist
@@ -111,6 +115,7 @@ def handlePickCorpus(*args):
 		if(len(name)>10):
 			name="..."+name[-7:]
 		corpusLabel.configure(text="Corpus: "+name)
+		handleKeyActivity()
 
 def handleSave(*args):
 	global fname
@@ -138,23 +143,32 @@ if(len(sys.argv)>1):
 	
 
 def handleSuggest(words, partial):
-	global autocorrect_corpus, suggestions
+	global autocorrect_corpus, suggestions, current_suggestion
 	if(autocorrect_corpus):
 		lastWords=words[-2:]
 		suggestions=[]
-		print("Partial: ", partial)
 		if(partial):
-			print("pfx:", lastWords[1])
 			suggestions=bigramSuggestPfx(autocorrect_corpus, lastWords[0], lastWords[1], invert_suggestions.get()>0)
 		else:
 			suggestions=bigramSuggest(autocorrect_corpus, lastWords[1], invert_suggestions.get()>0)
+		if(current_suggestion>=len(suggestions)):
+			current_suggestion=len(suggestions)-1
+			if(current_suggestion<0):
+				current_suggestion=0
 		suggestionBox.delete(START, END)
+		suggestionBox.tag_configure("sug"+str(current_suggestion), background="#aaaaff", foreground="#000000")
+		i=0
 		for w in suggestions:
-			suggestionBox.insert(END, w+"\n")
+			before=suggestionBox.index(CURRENT)
+			suggestionBox.insert(CURRENT, w)
+			after=suggestionBox.index(CURRENT)
+			suggestionBox.insert(CURRENT, "\n")
+			suggestionBox.tag_add("sug"+str(i), before, after)
+			i+=1
 
 
-editBox.tag_configure("inBlacklist", background="#ff0000", foreground="#ffffff")
-editBox.tag_configure("notInWhitelist", background="#00ff00", foreground="#ffffff")
+editBox.tag_configure("inBlacklist", background="#ffaaaa")
+editBox.tag_configure("notInWhitelist", background="#aaffaa")
 editBox.mark_set("matchStart", START)
 editBox.mark_set("matchEnd", START)
 
@@ -198,7 +212,7 @@ def handleKeyActivity(*args):
 	words.extend(text.split())
 	partial=text[-1]!=" "
 	stride=len(words[-1])+len(words[-2])+4
-	if(partial and args):
+	if(partial and args and len(words[-1])>1):
 		words[-2]+=words[-1]
 		words=words[:-1]
 	handleSuggest(words, partial)
@@ -221,14 +235,33 @@ def handleAcceptSuggestion(*args):
 			wl=len(text)-text.rfind(" ")
 			editBox.delete(END+"-"+str(wl-1)+"c", END)
 			editBox.insert(END, " ")
-		editBox.insert(END, suggestions[0]+" ")
+		editBox.insert(END, suggestions[current_suggestion]+" ")
 		handleKeyActivity()
 		return "break"
 		
-		
+def handleSuggestionNext(*args):
+	global suggestions, current_suggestion
+	suggestionBox.tag_configure("sug"+str(current_suggestion), background="#ffffff")
+	current_suggestion+=1
+	if(current_suggestion>=len(suggestions)):
+		current_suggestion=0
+	suggestionBox.tag_configure("sug"+str(current_suggestion), background="#aaaaff")
+	return "break"
+def handleSuggestionPrev(*args):
+	global suggestions, current_suggestion
+	suggestionBox.tag_configure("sug"+str(current_suggestion), background="#ffffff")
+	current_suggestion-=1
+	if(current_suggestion<0):
+		current_suggestion=len(suggestions)-1
+		if(current_suggestion<0):
+			current_suggestion=0
+	suggestionBox.tag_configure("sug"+str(current_suggestion), background="#aaaaff")
+	return "break"
 
 editBox.bind("<Key>", handleKeyActivity)
 editBox.bind("<Control-Return>", handleAcceptSuggestion)
+editBox.bind("<Control-Up>", handleSuggestionPrev)
+editBox.bind("<Control-Down>", handleSuggestionNext)
 
 top.mainloop()
 
