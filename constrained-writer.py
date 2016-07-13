@@ -171,16 +171,16 @@ if(has_nltk):
 		for line in editBuf.split("\n"):
 			newLine=""
 			for word in re.split(r'([A-Za-z0-9]+|[^A-Za-z0-9]+)', line):
-				newline+=fn(word)
+				newLine+=fn(word)
 			editBox.delete(str(currLine)+".0", str(currLine)+".end")
-			editBox.insert(str(currLine)+".0", newline)
+			editBox.insert(str(currLine)+".0", newLine)
 			currLine+=1
 			top.update_idletasks()
-	def handleMutateSyn(*arg, **kw_args): handleMutate(randSyn)	
-	def handleMutateAnt(*arg, **kw_args): handleMutate(randAnt)	
-	def handleMutateHyper(*arg, **kw_args): handleMutate(randSyn)	
-	def handleMutateHypo(*arg, **kw_args): handleMutate(randSyn)	
-	def handleMutateRhyme(*arg, **kw_args): handleMutate(randSyn)	
+	def handleMutateSyn(*arg, **kw_args): handleMutate(randomSyn)	
+	def handleMutateAnt(*arg, **kw_args): handleMutate(randomAnt)	
+	def handleMutateHyper(*arg, **kw_args): handleMutate(randomHyper)	
+	def handleMutateHypo(*arg, **kw_args): handleMutate(randomHypo)	
+	def handleMutateRhyme(*arg, **kw_args): handleMutate(randomRhyme)	
 	synonymButton.configure(command=handleMutateSyn)
 	antonymButton.configure(command=handleMutateAnt)
 	hypernymButton.configure(command=handleMutateHyper)
