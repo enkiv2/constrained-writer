@@ -54,6 +54,8 @@ editFrame=Frame(top)
 
 openButton=Button(cmdBarFrame, text="Open")
 saveButton=Button(cmdBarFrame, text="Save")
+exitButton=Button(cmdBarFrame, text="Exit")
+activityLabel=Label(cmdBarFrame, text="")
 
 whitelistFrame=Frame(corpusFrame)
 whitelistLabel=Label(whitelistFrame, text="Whitelist: none")
@@ -74,9 +76,13 @@ if(has_nltk):
 	hypernymButton=Button(mutateBarFrame, text="Hypernymize")
 	hyponymButton=Button(mutateBarFrame, text="Hyponymize")
 	rhymeButton=Button(mutateBarFrame, text="Rhyme")
-exitButton=Button(cmdBarFrame, text="Exit")
+
+
 openButton.pack(side=LEFT)
 saveButton.pack(side=LEFT)
+exitButton.pack(side=LEFT)
+activityLabel.pack(side=LEFT)
+
 whitelistLabel.pack(side=LEFT)
 whitelistButton.pack(side=LEFT)
 blacklistLabel.pack(side=LEFT)
@@ -85,7 +91,6 @@ corpusLabel.pack(side=LEFT)
 corpusButton.pack(side=LEFT)
 invertLabel.pack(side=LEFT)
 invertCheckbox.pack(side=LEFT)
-exitButton.pack(side=LEFT)
 
 editBox=Text(editFrame)
 suggestionBox=Text(editFrame, width=20)
@@ -105,6 +110,13 @@ if(has_nltk):
 	rhymeButton.pack(side=LEFT)
 	mutateBarFrame.pack(side=TOP, fill=X)
 editFrame.pack(side=BOTTOM, fill=BOTH,  expand=True)
+
+def busy(isBusy=True):
+	msg="Working..."
+	if(not isBusy):
+		msg=""
+	activityLabel.configure(text=msg)
+	top.update_idletasks()
 
 def handleExit(*args):
 	sys.exit(0)
@@ -178,6 +190,15 @@ blacklistButton.configure(command=handlePickBlacklist)
 corpusButton.configure(command=handlePickCorpus)
 if(has_nltk):
 	def handleMutate(fn):
+		busy()
+		if(whitelist):
+			old_fn=fn
+			def wrap(word):
+				ret=old_fn(word)
+				if(ret in whitelist):
+					return ret
+				return word
+			fn=wrap
 		editBuf=editBox.get(START, END)
 		currLine=1
 		for line in editBuf.split("\n"):
@@ -191,6 +212,8 @@ if(has_nltk):
 			handleKeyActivity()
 			currLine+=1
 			top.update_idletasks()
+			busy()
+		busy(False)
 	def handleMutateSyn(*arg, **kw_args): handleMutate(randomSyn)	
 	def handleMutateAnt(*arg, **kw_args): handleMutate(randomAnt)	
 	def handleMutateHyper(*arg, **kw_args): handleMutate(randomHyper)	
@@ -270,6 +293,7 @@ def handleCheckBlacklist(words, partial):
 					editBox.tag_add("inBlacklist","matchStart", "matchEnd")
 
 def handleKeyActivity(*args):
+	busy()
 	text=editBox.get(START, END)
 	if(args):
 		text+=args[0].char
@@ -291,6 +315,7 @@ def handleKeyActivity(*args):
 	editBox.mark_set("matchStart", matchStart)
 	editBox.mark_set("matchEnd", matchEnd)
 	handleCheckBlacklist(words, partial)
+	busy(False)
 
 def handleAcceptSuggestion(*args):
 	handleKeyActivity()
