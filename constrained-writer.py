@@ -49,18 +49,24 @@ START="0.0"
 
 top.wm_title("Constrained Writer")
 cmdBarFrame=Frame(top)
+corpusFrame=Frame(top)
 editFrame=Frame(top)
 
 openButton=Button(cmdBarFrame, text="Open")
 saveButton=Button(cmdBarFrame, text="Save")
-whitelistLabel=Label(cmdBarFrame, text="Whitelist: none")
-whitelistButton=Button(cmdBarFrame, text="Set Whitelist")
-blacklistLabel=Label(cmdBarFrame, text="Blacklist: none")
-blacklistButton=Button(cmdBarFrame, text="Set Blacklist")
-corpusLabel=Label(cmdBarFrame, text="Corpus: none")
-corpusButton=Button(cmdBarFrame, text="Set autocorrect corpus")
-invertLabel=Label(cmdBarFrame, text="Invert:")
-invertCheckbox=Checkbutton(cmdBarFrame, variable=invert_suggestions)
+
+whitelistFrame=Frame(corpusFrame)
+whitelistLabel=Label(whitelistFrame, text="Whitelist: none")
+whitelistButton=Button(whitelistFrame, text="Set Whitelist")
+blacklistFrame=Frame(corpusFrame)
+blacklistLabel=Label(blacklistFrame, text="Blacklist: none")
+blacklistButton=Button(blacklistFrame, text="Set Blacklist")
+acFrame=Frame(corpusFrame)
+corpusLabel=Label(acFrame, text="Corpus: none")
+corpusButton=Button(acFrame, text="Set autocorrect corpus")
+invertLabel=Label(acFrame, text="Invert:")
+invertCheckbox=Checkbutton(acFrame, variable=invert_suggestions)
+
 if(has_nltk):
 	mutateBarFrame=Frame(top)
 	synonymButton=Button(mutateBarFrame, text="Synonymize")
@@ -87,6 +93,10 @@ editBox.pack(side=LEFT, fill=BOTH, expand=True)
 suggestionBox.pack(fill=Y, expand=True)
 
 cmdBarFrame.pack(side=TOP, fill=X)
+whitelistFrame.pack(side=TOP, fill=X)
+blacklistFrame.pack(side=TOP, fill=X)
+acFrame.pack(side=TOP, fill=X)
+corpusFrame.pack(side=TOP, fill=X)
 if(has_nltk):
 	synonymButton.pack(side=LEFT)
 	antonymButton.pack(side=LEFT)
@@ -122,8 +132,8 @@ def handlePickWhitelist(*args):
 	if(name):
 		whitelist=loadBigrams(name)
 		name=name[:-8]
-		if(len(name)>10):
-			name="..."+name[-7:]
+		if(len(name)>100):
+			name="..."+name[-97:]
 		whitelistLabel.configure(text="Whitelist: "+name)
 		handleKeyActivity()
 
@@ -133,8 +143,8 @@ def handlePickBlacklist(*args):
 	if(name):
 		blacklist=loadBigrams(name)
 		name=name[:-8]
-		if(len(name)>10):
-			name="..."+name[-7:]
+		if(len(name)>100):
+			name="..."+name[-97:]
 		blacklistLabel.configure(text="Blacklist: "+name)
 		handleKeyActivity()
 
@@ -144,8 +154,8 @@ def handlePickCorpus(*args):
 	if(name):
 		autocorrect_corpus=loadBigrams(name)
 		name=name[:-8]
-		if(len(name)>10):
-			name="..."+name[-7:]
+		if(len(name)>100):
+			name="..."+name[-97:]
 		corpusLabel.configure(text="Corpus: "+name)
 		handleKeyActivity()
 
@@ -176,6 +186,9 @@ if(has_nltk):
 				newLine+=fn(word)
 			editBox.delete(str(currLine)+".0", str(currLine)+".end")
 			editBox.insert(str(currLine)+".0", newLine)
+			editBox.mark_set("matchStart", str(currLine)+".0")
+			editBox.mark_set("matchEnd", str(currLine)+".0")
+			handleKeyActivity()
 			currLine+=1
 			top.update_idletasks()
 	def handleMutateSyn(*arg, **kw_args): handleMutate(randomSyn)	
