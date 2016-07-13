@@ -84,16 +84,16 @@ exitButton.pack(side=LEFT)
 editBox=Text(editFrame)
 suggestionBox=Text(editFrame, width=20)
 editBox.pack(side=LEFT, fill=BOTH, expand=True)
-suggestionBox.pack()
+suggestionBox.pack(fill=Y, expand=True)
 
-cmdBarFrame.pack(side=TOP)
+cmdBarFrame.pack(side=TOP, fill=X)
 if(has_nltk):
 	synonymButton.pack(side=LEFT)
 	antonymButton.pack(side=LEFT)
 	hypernymButton.pack(side=LEFT)
 	hyponymButton.pack(side=LEFT)
 	rhymeButton.pack(side=LEFT)
-	mutateBarFrame.pack(side=BOTTOM)
+	mutateBarFrame.pack(side=TOP, fill=X)
 editFrame.pack(side=BOTTOM, fill=BOTH,  expand=True)
 
 def handleExit(*args):
