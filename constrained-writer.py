@@ -111,10 +111,16 @@ if(has_nltk):
 	mutateBarFrame.pack(side=TOP, fill=X)
 editFrame.pack(side=BOTTOM, fill=BOTH,  expand=True)
 
+global busyLevel
+busyLevel=1
 def busy(isBusy=True):
-	msg="Working..."
+	global busyLevel
+	msg="Working.."+("."*busyLevel)
 	if(not isBusy):
 		msg=""
+	else:
+		busyLevel+=1
+		if(busyLevel>3): busyLevel=1
 	activityLabel.configure(text=msg)
 	top.update_idletasks()
 
@@ -205,6 +211,7 @@ if(has_nltk):
 			newLine=""
 			for word in re.split(r'([A-Za-z0-9]+|[^A-Za-z0-9]+)', line):
 				newLine+=fn(word)
+				busy()
 			editBox.delete(str(currLine)+".0", str(currLine)+".end")
 			editBox.insert(str(currLine)+".0", newLine)
 			editBox.mark_set("matchStart", str(currLine)+".0")
