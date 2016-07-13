@@ -11,6 +11,24 @@ except:
 
 from autosuggest import *
 
+has_nltk=False
+try:
+	import nltk
+	try:
+		from nltk.corpus import wordnet
+	except:
+		nltk.download("wordnet")
+	try:
+		from nltk.corpus import cmudict
+	except:
+		nltk.download("cmudict")
+	from word_transformations import *
+	import re
+	has_nltk=True
+except:
+	print("We don't have NLTK or can't download some corpora.")
+
+
 import sys
 
 top=Tk()
@@ -43,6 +61,12 @@ corpusLabel=Label(cmdBarFrame, text="Corpus: none")
 corpusButton=Button(cmdBarFrame, text="Set autocorrect corpus")
 invertLabel=Label(cmdBarFrame, text="Invert:")
 invertCheckbox=Checkbutton(cmdBarFrame, variable=invert_suggestions)
+if(has_nltk):
+	synonymButton=Button(cmdBarFrame, text="Synonymize")
+	antonymButton=Button(cmdBarFrame, text="Antoonymize")
+	hypernymButton=Button(cmdBarFrame, text="Hypernymize")
+	hyponymButton=Button(cmdBarFrame, text="Hyponymize")
+	rhymeButton=Button(cmdBarFrame, text="Rhyme")
 exitButton=Button(cmdBarFrame, text="Exit")
 openButton.pack(side=LEFT)
 saveButton.pack(side=LEFT)
@@ -54,6 +78,12 @@ corpusLabel.pack(side=LEFT)
 corpusButton.pack(side=LEFT)
 invertLabel.pack(side=LEFT)
 invertCheckbox.pack(side=LEFT)
+if(has_nltk):
+	synonymButton.pack(side=LEFT)
+	antonymButton.pack(side=LEFT)
+	hypernymButton.pack(side=LEFT)
+	hyponymButton.pack(side=LEFT)
+	rhymeButton.pack(side=LEFT)
 exitButton.pack(side=LEFT)
 
 editBox=Text(editFrame)
@@ -134,6 +164,28 @@ exitButton.configure(command=handleExit)
 whitelistButton.configure(command=handlePickWhitelist)
 blacklistButton.configure(command=handlePickBlacklist)
 corpusButton.configure(command=handlePickCorpus)
+if(has_nltk):
+	def handleMutate(fn):
+		editBuf=editBox.get(START, END)
+		currLine=1
+		for line in editBuf.split("\n"):
+			newLine=""
+			for word in re.split(r'([A-Za-z0-9]+|[^A-Za-z0-9]+)', line):
+				newline+=fn(word)
+			editBox.delete(str(currLine)+".0", str(currLine)+".end")
+			editBox.insert(str(currLine)+".0", newline)
+			currLine+=1
+			top.update_idletasks()
+	def handleMutateSyn(*arg, **kw_args): handleMutate(randSyn)	
+	def handleMutateAnt(*arg, **kw_args): handleMutate(randAnt)	
+	def handleMutateHyper(*arg, **kw_args): handleMutate(randSyn)	
+	def handleMutateHypo(*arg, **kw_args): handleMutate(randSyn)	
+	def handleMutateRhyme(*arg, **kw_args): handleMutate(randSyn)	
+	synonymButton.configure(command=handleMutateSyn)
+	antonymButton.configure(command=handleMutateAnt)
+	hypernymButton.configure(command=handleMutateHyper)
+	hyponymButton.configure(command=handleMutateHypo)
+	rhymeButton.configure(command=handleMutateRhyme)
 
 if(len(sys.argv)>1):
 	with open(sys.argv[1], 'r') as f:
