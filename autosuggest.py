@@ -53,6 +53,24 @@ def corpus2bigrams(text):
 		else:
 			world[lastWord][word]+=1
 		lastWord=word
+	if(not lastWord in world):
+		world[lastWord]={}
+	return world
+
+def nlList2bigrams(text):
+	world={}
+	lastWord=""
+	for w in text.split("\n"):
+		word=w.lower()
+		if(not(lastWord in world)):
+			world[lastWord]={}
+		if(not(word in world[lastWord])):
+			world[lastWord][word]=1
+		else:
+			world[lastWord][word]+=1
+		lastWord=word
+	if(not lastWord in world):
+		world[lastWord]={}
 	return world
 
 def checkWhiteList(world, word, blacklist=False):
