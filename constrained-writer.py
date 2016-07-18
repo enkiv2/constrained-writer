@@ -54,6 +54,8 @@ editFrame=Frame(top)
 
 openButton=Button(cmdBarFrame, text="Open")
 saveButton=Button(cmdBarFrame, text="Save")
+speakButton=Button(cmdBarFrame, text="Speak")
+stfuButton=Button(cmdBarFrame, text="STFU")
 exitButton=Button(cmdBarFrame, text="Exit")
 activityLabel=Label(cmdBarFrame, text="")
 
@@ -80,6 +82,8 @@ if(has_nltk):
 
 openButton.pack(side=LEFT)
 saveButton.pack(side=LEFT)
+speakButton.pack(side=LEFT)
+stfuButton.pack(side=LEFT)
 exitButton.pack(side=LEFT)
 activityLabel.pack(side=LEFT)
 
@@ -123,6 +127,16 @@ def busy(isBusy=True):
 		if(busyLevel>3): busyLevel=1
 	activityLabel.configure(text=msg)
 	top.update_idletasks()
+def handleStfu(*args):
+	(stdin, stdout)=os.popen2("killall flite")
+	stdin.close()
+def handleSpeak(*args):
+	text=editBox.get(START, END)
+	(stdin, stdout)=os.popen2("flite")
+	stdin.write(text)
+	stdin.write("\n")
+	stdin.close()
+	
 
 def handleExit(*args):
 	sys.exit(0)
@@ -190,6 +204,8 @@ def handleSave(*args):
 
 openButton.configure(command=handleOpen)
 saveButton.configure(command=handleSave)
+speakButton.configure(command=handleSpeak)
+stfuButton.configure(command=handleStfu)
 exitButton.configure(command=handleExit)
 whitelistButton.configure(command=handlePickWhitelist)
 blacklistButton.configure(command=handlePickBlacklist)
