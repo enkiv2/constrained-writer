@@ -57,6 +57,7 @@ editFrame=Frame(top)
 
 openButton=Button(cmdBarFrame, text="Open")
 saveButton=Button(cmdBarFrame, text="Save")
+saveAsButton=Button(cmdBarFrame, text="Save as")
 speakButton=Button(cmdBarFrame, text="Speak")
 stfuButton=Button(cmdBarFrame, text="STFU")
 exitButton=Button(cmdBarFrame, text="Exit")
@@ -86,6 +87,7 @@ if(has_nltk):
 
 openButton.pack(side=LEFT)
 saveButton.pack(side=LEFT)
+saveAsButton.pack(side=LEFT)
 speakButton.pack(side=LEFT)
 stfuButton.pack(side=LEFT)
 exitButton.pack(side=LEFT)
@@ -196,7 +198,7 @@ def handlePickCorpus(*args):
 		corpusLabel.configure(text="Corpus: "+name)
 		handleKeyActivity()
 
-def handleSave(*args):
+def handleSaveAs(*args):
 	global fname
 	name=tkFileDialog.asksaveasfilename(initialfile=fname, filetypes=[('text', '.txt')])
 	if(name):
@@ -205,9 +207,15 @@ def handleSave(*args):
 				fname=name
 				f.write(editBox.get(START, END).encode('utf8', 'replace'))
 				top.wm_title("Constrained Writer: "+fname)
+def handleSave(*args):
+	global fname
+	with open(fname, 'w') as f:
+		f.write(editBox.get(START, END).encode('utf8', 'replace'))
+		top.wm_title("Constrained Writer: "+fname)
 
 
 openButton.configure(command=handleOpen)
+saveAsButton.configure(command=handleSaveAs)
 saveButton.configure(command=handleSave)
 speakButton.configure(command=handleSpeak)
 stfuButton.configure(command=handleStfu)
