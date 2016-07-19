@@ -7,7 +7,7 @@ from nltk.corpus import cmudict
 
 from random import Random
 
-global rhymes, random, rhymelevel, antonyms, synonyms, hypernyms, hyponyms
+global rhymes, rhyme_chunks, random, rhymelevel, antonyms, synonyms, hypernyms, hyponyms
 
 random=Random()
 
@@ -16,16 +16,32 @@ synonyms={}
 hypernyms={}
 hyponyms={}
 rhymes={}
+rhyme_chunks={}
 rhymelevel=2
 
 
 # from http://kashthealien.wordpress.com/2013/06/15/213/
 def rhyme(inp, level):
+	global rhyme_chunks
+	if(not inp.isalpha()):
+		return []
+	inp=inp.lower()
+	key=""
 	entries=cmudict.entries()
 	syllables = [(word, syl) for word, syl in entries if word == inp]
+	if(len(syllables)>0):
+		key=repr(syllables[0][1][-level:])
+		if(key in rhyme_chunks):
+			print("Skipping because "+inp+" has a memoized rhyme")
+			return rhyme_chunks[key]
+	else:
+		print("Skipping because "+inp+" has no rhymes")
+		return []
 	myRhymes = []
 	for (word, syllable) in syllables:
 		myRhymes += [word for word, pron in entries if pron[-level:] == syllable[-level:]]
+	if(len(syllables)>0): 
+		rhyme_chunks[key]=list(set(myRhymes))
 	return list(set(myRhymes))
 
 def randomRhyme(w):
