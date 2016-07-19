@@ -29,7 +29,7 @@ except:
 	print("We don't have NLTK or can't download some corpora.")
 
 
-import sys
+import sys, math
 
 top=Tk()
 
@@ -262,8 +262,11 @@ if(has_nltk):
 def handleMutateSPlus(*arg, **kw_args):
 	def randomSPlus(word):
 		if(word.isalpha() and len(word)>0 and autocorrect_corpus):
-			ret=bigramSuggest(autocorrect_corpus, word)
-			if(len(ret)>0):
+			ret=bigramSuggest(autocorrect_corpus, word, invert_suggestions.get()>0)
+			ret2=[]
+			for i in range(0, len(ret)) :
+				ret2.extend([ret[i]]*int(math.ceil(math.log(len(ret)-i+2))))
+			if(len(ret2)>0):
 				return random.choice(ret)
 		return word
 	handleMutate(randomSPlus)
