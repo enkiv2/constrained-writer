@@ -46,6 +46,7 @@ def rhyme(inp, level):
 
 def randomRhyme(w):
 	global rhymes, random, rhymelevel
+	w=w.lower()
 	if not (w in rhymes):
 		rhymes[w]=rhyme(w, rhymelevel)
 		rhymes[w].append(w)
@@ -54,6 +55,7 @@ def randomRhyme(w):
 
 def randomAnt(w):
 	global random, antonyms
+	w=w.lower()
 	if not (w in antonyms):
 		ret=[]
 		for syn in wordnet.synsets(w):
@@ -67,6 +69,7 @@ def randomAnt(w):
 
 def randomSyn(w):
 	global random, synonyms
+	w=w.lower()
 	if not (w in synonyms):
 		ret=[]
 		for syn in wordnet.synsets(w):
@@ -79,6 +82,7 @@ def randomSyn(w):
 
 def randomHyper(w):
 	global random, hypernyms
+	w=w.lower()
 	if not (w in hypernyms):
 		ret=[]
 		for syn in wordnet.synsets(w):
@@ -92,6 +96,7 @@ def randomHyper(w):
 
 def randomHypo(w):
 	global random, hyponyms
+	w=w.lower()
 	if not (w in hyponyms):
 		ret=[]
 		for syn in wordnet.synsets(w):
