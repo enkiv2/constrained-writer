@@ -33,7 +33,10 @@ import sys
 
 top=Tk()
 
-global whitelist, blacklist, autocorrect_corpus, invert_suggestions, suggestions, current_suggestion, fname
+global whitelist, blacklist, autocorrect_corpus, invert_suggestions, suggestions, current_suggestion, fname, random
+
+from random import Random
+random=Random()
 
 fname=""
 whitelist=None
@@ -70,6 +73,7 @@ corpusLabel=Label(acFrame, text="Corpus: none")
 corpusButton=Button(acFrame, text="Set autocorrect corpus")
 invertLabel=Label(acFrame, text="Invert:")
 invertCheckbox=Checkbutton(acFrame, variable=invert_suggestions)
+sPlusButton=Button(acFrame, text="S++")
 
 if(has_nltk):
 	mutateBarFrame=Frame(top)
@@ -95,6 +99,7 @@ corpusLabel.pack(side=LEFT)
 corpusButton.pack(side=LEFT)
 invertLabel.pack(side=LEFT)
 invertCheckbox.pack(side=LEFT)
+sPlusButton.pack(side=LEFT)
 
 editBox=Text(editFrame)
 suggestionBox=Text(editFrame, width=20)
@@ -210,33 +215,33 @@ exitButton.configure(command=handleExit)
 whitelistButton.configure(command=handlePickWhitelist)
 blacklistButton.configure(command=handlePickBlacklist)
 corpusButton.configure(command=handlePickCorpus)
-if(has_nltk):
-	def handleMutate(fn):
-		busy()
-		if(whitelist):
-			old_fn=fn
-			def wrap(word):
-				ret=old_fn(word)
-				if(ret in whitelist):
-					return ret
-				return word
-			fn=wrap
-		editBuf=editBox.get(START, END)
-		currLine=1
-		for line in editBuf.split("\n"):
-			newLine=""
-			for word in re.split(r'([A-Za-z0-9]+|[^A-Za-z0-9]+)', line):
-				newLine+=fn(word)
-				busy()
-			editBox.delete(str(currLine)+".0", str(currLine)+".end")
-			editBox.insert(str(currLine)+".0", newLine)
-			editBox.mark_set("matchStart", str(currLine)+".0")
-			editBox.mark_set("matchEnd", str(currLine)+".0")
-			handleKeyActivity()
-			currLine+=1
-			top.update_idletasks()
+def handleMutate(fn):
+	busy()
+	if(whitelist):
+		old_fn=fn
+		def wrap(word):
+			ret=old_fn(word)
+			if(ret in whitelist):
+				return ret
+			return word
+		fn=wrap
+	editBuf=editBox.get(START, END)
+	currLine=1
+	for line in editBuf.split("\n"):
+		newLine=""
+		for word in re.split(r'([A-Za-z0-9]+|[^A-Za-z0-9]+)', line):
+			newLine+=fn(word)
 			busy()
-		busy(False)
+		editBox.delete(str(currLine)+".0", str(currLine)+".end")
+		editBox.insert(str(currLine)+".0", newLine)
+		editBox.mark_set("matchStart", str(currLine)+".0")
+		editBox.mark_set("matchEnd", str(currLine)+".0")
+		handleKeyActivity()
+		currLine+=1
+		top.update_idletasks()
+		busy()
+	busy(False)
+if(has_nltk):
 	def handleMutateSyn(*arg, **kw_args): handleMutate(randomSyn)	
 	def handleMutateAnt(*arg, **kw_args): handleMutate(randomAnt)	
 	def handleMutateHyper(*arg, **kw_args): handleMutate(randomHyper)	
@@ -247,7 +252,15 @@ if(has_nltk):
 	hypernymButton.configure(command=handleMutateHyper)
 	hyponymButton.configure(command=handleMutateHypo)
 	rhymeButton.configure(command=handleMutateRhyme)
-
+def handleMutateSPlus(*arg, **kw_args):
+	def randomSPlus(word):
+		if(word.isalpha() and len(word)>0 and autocorrect_corpus):
+			ret=bigramSuggest(autocorrect_corpus, word)
+			if(len(ret)>0):
+				return random.choice(ret)
+		return word
+	handleMutate(randomSPlus)
+sPlusButton.configure(command=handleMutateSPlus)
 if(len(sys.argv)>1):
 	with open(sys.argv[1], 'r') as f:
 		fname=sys.argv[1]
