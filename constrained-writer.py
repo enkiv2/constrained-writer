@@ -203,7 +203,7 @@ def handleSave(*args):
 		if(name!=fname):
 			with open(name, 'w') as f:
 				fname=name
-				f.write(editBox.get(START, END))
+				f.write(editBox.get(START, END).encode('utf8', 'replace'))
 				top.wm_title("Constrained Writer: "+fname)
 
 
