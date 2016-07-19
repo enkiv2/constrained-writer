@@ -219,12 +219,19 @@ def handleMutate(fn):
 	busy()
 	if(whitelist):
 		old_fn=fn
-		def wrap(word):
+		def wrap_wl(word):
 			ret=old_fn(word)
-			if(ret in whitelist):
+			if(ret.lower() in whitelist):
 				return ret
 			return word
-		fn=wrap
+		fn=wrap_wl
+	if(blacklist):
+		old_fn_2=fn
+		def wrap_bl(word):
+			ret=old_fn_2(word)
+			if(ret.lower() in blacklist):
+				return word
+			return ret
 	editBuf=editBox.get(START, END)
 	currLine=1
 	for line in editBuf.split("\n"):
