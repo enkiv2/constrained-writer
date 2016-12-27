@@ -28,6 +28,18 @@ try:
 except:
 	print("We don't have NLTK or can't download some corpora.")
 
+has_templating=False
+has_templateScripting=False
+try:
+	import templating
+	has_templating=True
+	try:
+		import templateScripting
+		has_templateScripting=True
+	except:
+		print("Can't use template scripting")
+except:
+	print("Can't use templating library")
 
 import sys, math
 
@@ -83,7 +95,10 @@ if(has_nltk):
 	hypernymButton=Button(mutateBarFrame, text="Hypernymize")
 	hyponymButton=Button(mutateBarFrame, text="Hyponymize")
 	rhymeButton=Button(mutateBarFrame, text="Rhyme")
-
+if(has_templating):
+	templateBarFrame=Frame(top)
+	importTemplateButton=Button(templateBarFrame, text="Import template")
+	scanTemplateButton=Button(templateBarFrame, text="Expand template rules")
 
 openButton.pack(side=LEFT)
 saveButton.pack(side=LEFT)
@@ -120,6 +135,43 @@ if(has_nltk):
 	hyponymButton.pack(side=LEFT)
 	rhymeButton.pack(side=LEFT)
 	mutateBarFrame.pack(side=TOP, fill=X)
+if(False and has_templating):
+	importTemplateButton.pack(side=LEFT)
+	scanTemplateButton.pack(side=LEFT)
+	templateBarFrame.pack(side=TOP, fill=X)
+	def handlePickTemplate(*args):
+		name=tkFileDialog.askopenfilename(filetypes=[('Pickled bigram model', '.bigrams')])
+		if(name):
+			templating.loadMergeRules(name)
+	importTemplateButton.configure(command=handlePickTemplate)
+	def handleScanTemplate(*args):
+		busy(True)
+		editBuf=editBox.get(START, END)
+		currLine=1
+		for line in editBuf.split("\n"):
+			if(re.search("#[^#]*#", line)):
+				for match in re.findIter("#[^#]*#", line):
+					name=match.string[match.pos:match.end()]
+					begin=match.pos+1
+					end=match.end()+1
+					editBox.mark_set("matchStart", str(begin)+"."+str(currLine))
+					editBox.mark_set("matchEnd", str(end)+"."+str(currLine))
+					editBox.tag_add("TEMPLATE_"+name, "matchStart", "matchEnd")
+					def templateBinding(*args):
+						expansion=templating.expandAll(name)
+						editBox.delete(str(begin)+"."+str(currLine), str(end)+"."+str(currLine))
+						editBox.insert(str(begin)+"."+str(currLine), expansion)
+						editBox.mark_set("matchStart", str(begin)+"."+str(currLine))
+						end=begin+len(expansion)
+						editBox.mark_set("matchEnd", str(end)+"."+str(currLine))
+						editBox.tag_add("TEMPLATE_"+name, "matchStart", "matchEnd")
+					editBox.bind_tag("TEMPLATE_"+name, templateBinding, "<Button-1>")
+					handleKeyActivity()
+					currLine+=1
+					top.update_idletasks()
+					busy()
+		busy(False)
+		
 editFrame.pack(side=BOTTOM, fill=BOTH,  expand=True)
 
 global busyLevel
