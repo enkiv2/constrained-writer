@@ -14,7 +14,7 @@ rules={}
 tag=re.compile("#[^# ]*#")
 
 def expandTag(match):
-	tname=match.string[match.pos+1:match.end()-1]
+	tname=match.string[match.start()+1:match.end()-1]
 	if(tname in rules):
 		rule=rules[tname]
 		return random.choice(rule)
@@ -37,7 +37,8 @@ def addRule(name, opt):
 def mergeRule(name, opt):
 	global rules
 	if(name in rules):
-		opt2=opt.extend(rules[name])
+		opt2=opt
+		opt2.extend(rules[name])
 		rules[name]=opt2
 	else:
 		rules[name]=opt
