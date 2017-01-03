@@ -11,7 +11,7 @@ random=Random()
 
 rules={}
 
-tag=re.compile("#[^# ]*#")
+tag=re.compile("#[a-zA-Z0-9]*#")
 
 def expandTag(match):
 	tname=match.string[match.start()+1:match.end()-1]
@@ -24,7 +24,7 @@ def performExpansion(line):
 	return tag.sub(expandTag, line)
 
 def expandAll(line, ttl=9999):
-	while(None!=tag.search(line) and ttl>0):
+	while(ttl>0 and None!=tag.search(line)):
 		ttl-=1
 		line=expandForth(performExpansion(line))
 		#print("Iter: "+line)
@@ -78,7 +78,7 @@ try:
 		ret=" ".join(forth.getStack())
 		return ret
 	def expandForth(line):
-		if(line.find("$")>=0):
+		if(line.find("$")<0):
 			return line
 		return forthSym.sub(evalWrap, forthSubst.sub(evalWrap, line))
 except:
