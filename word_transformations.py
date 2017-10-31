@@ -80,16 +80,14 @@ def randomSyn(w):
 		synonyms[w]=list(set(ret))
 	if len(synonyms[w])==0: return w
 	return random.choice(synonyms[w])
-
 def randomHyper(w):
 	global random, hypernyms
 	w=w.lower()
 	if not (w in hypernyms):
 		ret=[]
 		for syn in wordnet.synsets(w):
-			for l in syn.lemmas():
-				if l.hypernyms():
-					ret.append(l.hypernyms()[0].name())
+                            if syn.hypernyms():
+                                    ret.append(syn.hypernyms()[0].name())
 		ret.append(w)
 		hypernyms[w]=list(set(ret))
 	if len(hypernyms[w])==0: return w
@@ -101,13 +99,13 @@ def randomHypo(w):
 	if not (w in hyponyms):
 		ret=[]
 		for syn in wordnet.synsets(w):
-			for l in syn.lemmas():
-				if l.hyponyms():
-					ret.append(l.hyponyms()[0].name())
+			    if syn.hyponyms():
+				    ret.append(syn.hyponyms()[0].name())
 		ret.append(w)
 		hyponyms[w]=list(set(ret))
 	if len(hyponyms[w])==0: return w
 	return random.choice(hyponyms[w])
+
 
 def main():
 	def printHelp(w):
